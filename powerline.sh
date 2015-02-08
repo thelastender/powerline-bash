@@ -41,10 +41,10 @@ symbol_behind=$(printf "%b" "\xE2\x87\xA3")
 #################################################################
 # Color
 #################################################################
-git_fg_clean=0
-git_fg_dirty=15
-git_bg_clean=148
-git_bg_dirty=161
+vcs_fg_clean=0
+vcs_fg_dirty=15
+vcs_bg_clean=148
+vcs_bg_dirty=161
 
 username_fg=250
 username_bg=240
@@ -98,11 +98,11 @@ function format()
 ## git
 GIT=false
 git_ps1=""
-git_fg=$git_fg_clean
-git_bg=$git_bg_clean
+git_fg=$vcs_fg_clean
+git_bg=$vcs_bg_clean
 function get_git_status()
 {
-	git_status=$(git status --ignore-submodules)
+	git_status=$(git status --ignore-submodules 2>&1)
 	GIT=$([ $? -eq 0 ] && echo true)
 	if [[ "$GIT" = true ]]; then
 		SED="sed -r"
@@ -143,24 +143,65 @@ function get_git_status()
 			result="$result+"
 		fi
 		if [[ "$has_pending_commits" = true ]] || [[ "$has_untracked_files" = true ]]; then
-			git_fg=$git_fg_dirty
-			git_bg=$git_bg_dirty
+			git_fg=$vcs_fg_dirty
+			git_bg=$vcs_bg_dirty
 		fi
 		git_ps1=$result
 	fi
 }
 
+## svn
+SVN=false
+svn_ps1=""
+svn_fg=$vcs_fg_clean
+svn_bg=$vcs_bg_clean
+function get_svn_status()
+{
+	svn_status=$(svn status 2>&1)
+	if [[ "$svn_status" =~ "is not a working copy" ]]; then
+		return 0;
+	fi
+	SVN=true
+	has_pending_commits=false
+	has_untracked_files=false
+	origin_position=" svn "
+	origin_status=$(echo "$svn_status" | grep -c "^[ACDIMR\!~]")
+	if [[ $origin_status > 0 ]]; then
+		has_pending_commits=true
+		svn_fg=$vcs_fg_dirty
+		svn_bg=$vcs_bg_dirty
+		origin_position="$origin_position$origin_status "
+	fi
+	untracked_files_count=$(echo "$svn_status" | grep -c '^\?')
+	if [[ $untracked_files_count > 0 ]]; then
+		origin_position="$origin_position+$untracked_files_count"
+	fi
+	svn_ps1="$origin_position"
+}
+
+## username > hostname
 ps1="$(format $username_fg $username_bg ' \u') $(format $username_bg $hostname_bg $symbol_separator)$(format $hostname_fg $hostname_bg ' \h')"
+## path
 ps1="$ps1 $(format $hostname_bg $path_bg $symbol_separator)$(format $path_fg $path_bg ' \W')"
+## git
 get_git_status
+next_sep_fg=$path_bg
+next_sep_bg=$cmd_passed_bg
 if [[ "$GIT" = true ]]; then
-	ps1="$ps1 $(format $path_bg $git_bg $symbol_separator)$(format $git_fg $git_bg "$git_ps1") $(format $git_bg $cmd_passed_bg $symbol_separator)"
-else
-	ps1="$ps1 $(format $path_bg $cmd_passed_bg $symbol_separator)"
+	ps1="$ps1 $(format $path_bg $git_bg $symbol_separator)$(format $git_fg $git_bg "$git_ps1")"
+	next_sep_fg=$git_bg
 fi
+get_svn_status
+if [[ "$SVN" = true ]]; then
+	next_sep_bg=$svn_bg
+	ps1="$ps1 $(format $next_sep_fg $next_sep_bg $symbol_separator)$(format $svn_fg $svn_bg "$svn_ps1")"
+	next_sep_fg=$svn_bg
+	next_sep_bg=$cmd_passed_bg
+fi
+
+ps1="$ps1 $(format $next_sep_fg $next_sep_bg $symbol_separator)"
 
 ps1="$ps1$(format $cmd_passed_fg $cmd_passed_bg ' \$') \[\\e[0m\]\[\\e$(fgcolor $cmd_passed_fg)\]$symbol_separator \[\\e[0m\]"
 
 echo $ps1
 
-SVN=false
