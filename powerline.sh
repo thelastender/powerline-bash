@@ -111,7 +111,7 @@ function get_git_status()
 		fi
 		#git_status="On branch xxoo Your branch is ahead of 'origin/master' by 1 commit and have 5 and 4 different commits each. (use \"git push\" to publish your local commits) Changes not staged for commit: (use \"git add <file>...\" to update what will be committed) (use \"git checkout -- <file>...\" to discard changes in working directory) modified: powerline.sh no changes added to commit (use \"git add\" and/or \"git commit -a\")"
 		
-		branch=$(echo "$git_status" | awk '/^On branch/ { print $3; }')
+		branch=$(echo "$git_status" | awk '{ if(NR == 1) print $3; else exit; }')
 		has_pending_commits=true
 		has_untracked_files=false
 		origin_position=""
