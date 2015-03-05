@@ -125,11 +125,11 @@ function get_git_status()
 		fi
 
 		if [[ "$git_status" =~ "Your branch is ahead" ]] || [[ "$git_status" =~ "Your branch is behind" ]]; then
-			origin_status=$(echo $git_status | $SED "s/.*Your branch is (ahead|behind) of .* by ([0-9]+) commit.*/\1 \2/g")
+			origin_status=$(echo $git_status | $SED "s/.*Your branch is (ahead of|behind) .* by ([0-9]+) commit.*/\1 \2/g")
 			if [[ "$origin_status" =~ "ahead" ]]; then
-				origin_position="$(echo $origin_status | $SED 's/[a-z]+ //g')$symbol_ahead"
+				origin_position="$(echo $origin_status | $SED 's/ahead of //g')$symbol_ahead"
 			else
-				origin_position="$(echo $origin_status | $SED 's/[a-z]+ //g')$symbol_behind"
+				origin_position="$(echo $origin_status | $SED 's/behind //g')$symbol_behind"
 			fi
 		fi
 		diverged_pattern="and have [0-9]+ and [0-9]+ different commits each"
