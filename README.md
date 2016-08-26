@@ -9,6 +9,11 @@ A new powerline-shell which written with bash script and run more faster.
 * Bash 下运行，支持设置环境变量来决定是否开启。
 * 快速高效（历史命令智能判断）
 
+# 字体
+
+使用前先去[Powerline Fonts](https://github.com/powerline/fonts)去下载字体安装好。
+然后需要设置Terminal使用Powerline Font。
+
 # 使用
 
 如果你的powerline.sh放在HOME目录下，
@@ -25,3 +30,7 @@ if [ "$TERM" != "linux" ]; then
 	PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
 fi
 ```
+
+## 简化
+如果你仅仅想显示git，那么可以使用简化的```powerline-git.sh```文件，这个只处理git，而且并不需要安装额外字体。
+
