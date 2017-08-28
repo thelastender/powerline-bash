@@ -203,5 +203,5 @@ ps1="$ps1 $(format $next_sep_fg $next_sep_bg $symbol_separator)"
 
 ps1="$ps1$(format $cmd_passed_fg $cmd_passed_bg ' \$') \[\\e[0m\]\[\\e$(fgcolor $cmd_passed_fg)\]$symbol_separator \[\\e[0m\]"
 
-echo $ps1
+echo "$ps1 "
 

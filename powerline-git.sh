@@ -128,5 +128,5 @@ if [[ "$1" != "0" ]]; then
 else
 	ps1="$ps1 $(format $cmd_passed_fg $cmd_passed_bg '\$')\[\e[0m\]"
 fi
-echo $ps1
+echo "$ps1 "
 
